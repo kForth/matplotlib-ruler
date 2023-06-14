@@ -484,23 +484,21 @@ class Ruler(AxesWidget):
 
     def _update_text(self):
         if self.length_unit is not None:
-            detail_string = (
-                "L: {:0.3f} {}; dx: {:0.3f} {}; dy: {:0.3f} {}; "
-                "angle: {:0.3f} deg".format(
-                    self.ruler_length,
-                    self.length_unit,
-                    self.ruler_dx,
-                    self.length_unit,
-                    self.ruler_dy,
-                    self.length_unit,
-                    self.ruler_angle,
+            detail_string = "; ".join(
+                (
+                    f"L: {self.ruler_length:0.3f} {self.length_unit}",
+                    f"dx: {self.ruler_dx:0.3f} {self.ruler_dx}",
+                    f"dy: {self.ruler_dy:0.3f} {self.ruler_dy}",
+                    f"ang: {self.ruler_angle:0.3f} deg",
                 )
             )
         else:
-            detail_string = (
-                "L: {:0.3f}; dx: {:0.3f}; dy: {:0.3f}; "
-                "ang: {:0.3f} deg".format(
-                    self.ruler_length, self.ruler_dx, self.ruler_dy, self.ruler_angle
+            detail_string = "; ".join(
+                (
+                    f"L: {self.ruler_length:0.3f}",
+                    f"dx: {self.ruler_dx:0.3f}",
+                    f"dy: {self.ruler_dy:0.3f}",
+                    f"ang: {self.ruler_angle:0.3f} deg",
                 )
             )
 
