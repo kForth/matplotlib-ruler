@@ -1,5 +1,5 @@
-# matplotlib-tools
-Various tools for matplotlib.
+# matplotlib-ruler
+Ruler tool for matplotlib.
 
 ## Ruler
 

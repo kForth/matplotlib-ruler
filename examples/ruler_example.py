@@ -3,7 +3,7 @@ import traceback
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib_tools.tools import Ruler
+from matplotlib_ruler.tools import Ruler
 
 
 def handleException(exc_type, exc_value, exc_traceback):

@@ -4,7 +4,7 @@ include = '''
 
 (
     (
-        matplotlib_tools
+        matplotlib_ruler
       | .github
     ).*\.pyi?$
 )|(
