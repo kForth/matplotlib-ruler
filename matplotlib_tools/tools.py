@@ -6,93 +6,95 @@ from matplotlib.text import Text
 
 class Ruler(AxesWidget):
     """
-    A ruler to measure distances and angles on an axes instance. 
-    
+    A ruler to measure distances and angles on an axes instance.
+
     For the ruler to remain responsive you must keep a reference to it.
 
     Parameters
     ----------
-    ax  : the  :class:`matplotlib.axes.Axes` instance 
-       
+    ax  : the  :class:`matplotlib.axes.Axes` instance
+
     active : bool, default is True
-        Whether the ruler is active or not. 
-    
-    length_unit  : string, A length unit identifier to use in displayed text  
+        Whether the ruler is active or not.
+
+    length_unit  : string, A length unit identifier to use in displayed text
         i.e. ('ft', or 'm')
-                        
+
     angle_unit  : string, The type of angle unit ('degrees' or 'radians')
-        
+
     print_text  : bool, default is False
         Whether the length measure string is printed to the console
 
     useblit : bool, default is False
         If True, use the backend-dependent blitting features for faster
-        canvas updates. 
+        canvas updates.
 
     lineprops : dict, default is None
       Dictionary of :class:`matplotlib.lines.Line2D` properties
-                   
+
     markerprops : dict, default is None
       Dictionary of :class:`matplotlib.markers.MarkerStyle` properties
-      
+
     textprops: dict, default is None
-        Dictionary of :class:`matplotlib.text.Text` properties. To reposition the 
+        Dictionary of :class:`matplotlib.text.Text` properties. To reposition the
         textbox you can overide the defaults which position the box in the top left
-        corner of the axes. 
-          
+        corner of the axes.
+
     Usage:
     ----------
 
     1. Hold left click drag and release to draw the ruler in the axes.
       - Hold shift while dragging to lock the ruler to the horizontal axis.
-      - Hold control while drawing to lock the ruler to the vertical axis. 
+      - Hold control while drawing to lock the ruler to the vertical axis.
 
-    2. Right click one of the markers to move the ruler. 
+    2. Right click one of the markers to move the ruler.
 
-    The keyboard can be used to activate and deactivate the ruler and toggle 
+    The keyboard can be used to activate and deactivate the ruler and toggle
     visibility of the line and text:
 
-    'm' : Toggles the ruler on and off. 
+    'm' : Toggles the ruler on and off.
 
-    'ctl+m' : Toggles the visibility of the ruler and text. 
-    
+    'ctl+m' : Toggles the visibility of the ruler and text.
+
     Example
     ----------
-    
+
     >>> xCoord = np.arange(0, 5, 1)
     >>> yCoord = [0, 1, -3, 5, -3]
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    
+
     >>> markerprops = dict(marker='o', markersize=5, markeredgecolor='red')
     >>> lineprops = dict(color='red', linewidth=2)
-    
+
     >>> ax.grid(True)
     >>> ax.plot(xCoord, yCoord)
-    
+
     >>> ruler = Ruler(ax=ax,
                   useblit=True,
                   markerprops=markerprops,
                   lineprops=lineprops)
-    
+
     >>> plt.show()
-    
+
     """
 
-    def __init__(self,
-                 ax,
-                 active=True,
-                 length_unit=None,
-                 angle_unit='degree',
-                 print_text=False,
-                 useblit=False,
-                 lineprops=None,
-                 textprops=None,
-                 markerprops=None):
+    def __init__(
+        self,
+        ax,
+        active=True,
+        length_unit=None,
+        angle_unit="degree",
+        print_text=False,
+        useblit=False,
+        lineprops=None,
+        textprops=None,
+        markerprops=None,
+    ):
         """
-        Add a ruler to *ax*. If ``ruler_active=True``, the ruler will be 
-        activated when the plot is first created. If ``ruler_unit`` is set the 
-        string will be appended to the length text annotations. 
+        Add a ruler to *ax*. If ``ruler_active=True``, the ruler will be
+        activated when the plot is first created. If ``ruler_unit`` is set the
+        string will be appended to the length text annotations.
 
         """
         AxesWidget.__init__(self, ax)
@@ -131,31 +133,32 @@ class Ruler(AxesWidget):
         if lineprops is None:
             lineprops = {}
 
-        bbox = dict(facecolor='white',
-                    alpha=0.5,
-                    boxstyle='round',
-                    edgecolor='0.75')
+        bbox = dict(facecolor="white", alpha=0.5, boxstyle="round", edgecolor="0.75")
 
-        used_textprops = dict(xy=(0, 1),
-                              xytext=(10, -10),
-                              xycoords='axes fraction',
-                              textcoords='offset points',
-                              ha='left',
-                              va='center',
-                              bbox=bbox)
+        used_textprops = dict(
+            xy=(0, 1),
+            xytext=(10, -10),
+            xycoords="axes fraction",
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            bbox=bbox,
+        )
 
         x0 = np.nan
         y0 = np.nan
 
-        self._ruler, = self.ax.plot([x0, x0], [y0, y0], **lineprops)
+        (self._ruler,) = self.ax.plot([x0, x0], [y0, y0], **lineprops)
 
-        used_markerprops = dict(marker='s',
-                                markersize=3,
-                                markerfacecolor='white',
-                                markeredgecolor='black',
-                                markeredgewidth=0.5,
-                                picker=5,
-                                visible=False)
+        used_markerprops = dict(
+            marker="s",
+            markersize=3,
+            markerfacecolor="white",
+            markeredgecolor="black",
+            markeredgewidth=0.5,
+            picker=5,
+            visible=False,
+        )
 
         # If marker or text  props are given as an argument combine with the
         # default marker props. Don't really want to override the entire props
@@ -167,28 +170,30 @@ class Ruler(AxesWidget):
         if textprops is not None:
             used_textprops.update(used_textprops)
 
-        self._axes_text = self.ax.annotate(s='', **used_textprops)
+        self._axes_text = self.ax.annotate(s="", **used_textprops)
         self.ax.add_artist(self._axes_text)
 
-        self._marker_a, = self.ax.plot((x0, y0), **used_markerprops)
-        self._marker_b, = self.ax.plot((x0, y0), **used_markerprops)
-        self._marker_c, = self.ax.plot((x0, y0), **used_markerprops)
+        (self._marker_a,) = self.ax.plot((x0, y0), **used_markerprops)
+        (self._marker_b,) = self.ax.plot((x0, y0), **used_markerprops)
+        (self._marker_c,) = self.ax.plot((x0, y0), **used_markerprops)
 
-        self._artists = [self._axes_text,
-                         self._ruler,
-                         self._marker_a,
-                         self._marker_b,
-                         self._marker_c]
+        self._artists = [
+            self._axes_text,
+            self._ruler,
+            self._marker_a,
+            self._marker_b,
+            self._marker_c,
+        ]
 
     def connect_events(self):
         """
         Connect all events to the various callbacks
         """
-        self.connect_event('button_press_event', self._on_press)
-        self.connect_event('button_release_event', self._on_release)
-        self.connect_event('motion_notify_event', self._on_move)
-        self.connect_event('key_press_event', self._on_key_press)
-        self.connect_event('key_release_event', self._on_key_release)
+        self.connect_event("button_press_event", self._on_press)
+        self.connect_event("button_release_event", self._on_release)
+        self.connect_event("motion_notify_event", self._on_move)
+        self.connect_event("key_press_event", self._on_key_press)
+        self.connect_event("key_release_event", self._on_key_release)
 
     def ignore(self, event):
         """
@@ -203,39 +208,39 @@ class Ruler(AxesWidget):
 
     def _on_key_press(self, event):
         """
-        Handle key press events. 
-        
+        Handle key press events.
+
         If shift is pressed the ruler will be constrained to horizontal axis
         If control is pressed the ruler will be constrained to vertical axis
         If m is pressed the ruler will be toggled on and off
         If ctrl+m is pressed the visibility of the ruler will be toggled
         """
 
-        if event.key == 'shift':
+        if event.key == "shift":
             self._shift_pressed = True
 
-        if event.key == 'control':
+        if event.key == "control":
             self._control_pressed = True
 
-        if event.key == 'm':
+        if event.key == "m":
             self.toggle_ruler()
 
-        if event.key == 'ctrl+m':
+        if event.key == "ctrl+m":
             self.toggle_ruler_visibility()
 
     def _on_key_release(self, event):
         """
         Handle key release event, flip the flags to false.
         """
-        if event.key == 'shift':
+        if event.key == "shift":
             self._shift_pressed = False
 
-        if event.key == 'control':
+        if event.key == "control":
             self._control_pressed = False
 
     def toggle_ruler(self):
         """
-        Called when the 'm' key is pressed. If ruler is on turn it off, and 
+        Called when the 'm' key is pressed. If ruler is on turn it off, and
         vise versa
         """
 
@@ -261,7 +266,7 @@ class Ruler(AxesWidget):
 
     def _on_press(self, event):
         """
-        On mouse button press check which button has been pressed and handle 
+        On mouse button press check which button has been pressed and handle
         """
         if self.ignore(event):
             return
@@ -272,7 +277,7 @@ class Ruler(AxesWidget):
 
     def _handle_button1_press(self, event):
         """
-        On button 1 press start drawing the ruler line from the initial 
+        On button 1 press start drawing the ruler line from the initial
         press position
         """
 
@@ -291,8 +296,8 @@ class Ruler(AxesWidget):
 
     def _handle_button3_press(self, event):
         """
-        If button 3 is pressed (right click) check if cursor is at one of the 
-        ruler markers and the move the ruler accordingly. 
+        If button 3 is pressed (right click) check if cursor is at one of the
+        ruler markers and the move the ruler accordingly.
         """
         contains_a, _ = self._marker_a.contains(event)
         contains_b, _ = self._marker_b.contains(event)
@@ -333,7 +338,7 @@ class Ruler(AxesWidget):
     def _move_ruler(self, event):
         """
         If one of the markers is locked move the ruler according the selected
-        marker. 
+        marker.
         """
 
         # This flag is used to prevent the ruler from clipping when a marker is
@@ -369,10 +374,14 @@ class Ruler(AxesWidget):
             pos_a = self._x0 + b_dx, self._x1 + b_dx
             pos_b = self._y0 + b_dy, self._y1 + b_dy
 
-            marker_a_coords = self._old_marker_a_coords[0][0] + b_dx, \
-                              self._old_marker_a_coords[0][1] + b_dy
-            marker_c_coords = self._old_marker_c_coords[0][0] + b_dx, \
-                              self._old_marker_c_coords[0][1] + b_dy
+            marker_a_coords = (
+                self._old_marker_a_coords[0][0] + b_dx,
+                self._old_marker_a_coords[0][1] + b_dy,
+            )
+            marker_c_coords = (
+                self._old_marker_c_coords[0][0] + b_dx,
+                self._old_marker_c_coords[0][1] + b_dy,
+            )
 
             self._ruler.set_data(pos_a, pos_b)
             self._marker_a.set_data(marker_a_coords)
@@ -394,7 +403,7 @@ class Ruler(AxesWidget):
 
     def _draw_ruler(self, event):
         """
-        If the left mouse button is pressed and held draw the ruler as the 
+        If the left mouse button is pressed and held draw the ruler as the
         mouse is dragged
         """
 
@@ -439,20 +448,25 @@ class Ruler(AxesWidget):
 
     def _update_text(self):
         if self.length_unit is not None:
-            detail_string = 'L: {:0.3f} {}; dx: {:0.3f} {}; dy: {:0.3f} {}; ' \
-                            'angle: {:0.3f} deg'.format(self.ruler_length,
-                                                        self.length_unit,
-                                                        self.ruler_dx,
-                                                        self.length_unit,
-                                                        self.ruler_dy,
-                                                        self.length_unit,
-                                                        self.ruler_angle)
+            detail_string = (
+                "L: {:0.3f} {}; dx: {:0.3f} {}; dy: {:0.3f} {}; "
+                "angle: {:0.3f} deg".format(
+                    self.ruler_length,
+                    self.length_unit,
+                    self.ruler_dx,
+                    self.length_unit,
+                    self.ruler_dy,
+                    self.length_unit,
+                    self.ruler_angle,
+                )
+            )
         else:
-            detail_string = 'L: {:0.3f}; dx: {:0.3f}; dy: {:0.3f}; ' \
-                            'ang: {:0.3f} deg'.format(self.ruler_length,
-                                                        self.ruler_dx,
-                                                        self.ruler_dy,
-                                                        self.ruler_angle)
+            detail_string = (
+                "L: {:0.3f}; dx: {:0.3f}; dy: {:0.3f}; "
+                "ang: {:0.3f} deg".format(
+                    self.ruler_length, self.ruler_dx, self.ruler_dy, self.ruler_angle
+                )
+            )
 
         self._axes_text.set_text(detail_string)
         if self._print_text is True:
@@ -486,7 +500,7 @@ class Ruler(AxesWidget):
         pos0, pos1 = self._ruler.get_path().vertices
         angle = np.arctan2(pos1[0] - pos0[0], pos1[1] - pos0[1])
 
-        if self.angle_unit == 'degree':
+        if self.angle_unit == "degree":
             return angle * 180 / np.pi
         else:
             return angle
@@ -494,7 +508,7 @@ class Ruler(AxesWidget):
 
 class TextMover(object):
     """
-    A simple little tool to move text annotation in an axes by clicking and dragging them. 
+    A simple little tool to move text annotation in an axes by clicking and dragging them.
 
     """
 
@@ -508,11 +522,10 @@ class TextMover(object):
 
     def connect_events(self):
         self.ax.figure.canvas.mpl_connect("pick_event", self.on_pick_event)
-        self.ax.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
-        self.ax.figure.canvas.mpl_connect('button_release_event', self.on_release)
+        self.ax.figure.canvas.mpl_connect("motion_notify_event", self.on_motion)
+        self.ax.figure.canvas.mpl_connect("button_release_event", self.on_release)
 
     def on_pick_event(self, event):
-
         if self.active is False:
             return
 
@@ -550,7 +563,6 @@ class TextMover(object):
             canvas.blit(axes.bbox)
 
     def on_release(self, event):
-
         if self.selectedText is None:
             return
 
@@ -560,4 +572,3 @@ class TextMover(object):
         self.background = None
         self.selectedText.figure.canvas.draw()
         self.selectedText = None
-
