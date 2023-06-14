@@ -28,7 +28,6 @@ setup(
     description="TODO: Description",
     entry_points={},
     install_requires=requirements,
-    extras_require=[],
     long_description=readme,
     include_package_data=True,
     keywords="matplotlib_ruler",
