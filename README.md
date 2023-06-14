@@ -1,7 +1,7 @@
 # matplotlib-tools
 Various tools for matplotlib.
 
-<h2>Ruler</h2>
+## Ruler
 
 An an interactive ruler to measure distances. Heavily inspired by the tool in ImageJ.
     
@@ -45,7 +45,7 @@ Example
     
 
 
-![Ruler Gif](/animated_gif/ruler_example.gif?raw=True)
+![Ruler Gif](/docs/ruler_example.gif?raw=True)
 
 
 
