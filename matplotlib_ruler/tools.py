@@ -269,7 +269,14 @@ class Ruler(AxesWidget):
         """
         if self.ignore(event):
             return
-        if event.button == 1 and self._mouse3_pressed is False:
+        if event.dblclick:
+            self._ruler.set_data([], [])
+            self._marker_a.set_data((None, None))
+            self._marker_b.set_data((None, None))
+            self._marker_c.set_data((None, None))
+            self._axes_text.set_text("")
+            self.canvas.draw_idle()
+        elif event.button == 1 and self._mouse3_pressed is False:
             self._handle_button1_press(event)
         elif event.button == 3:
             self._handle_button3_press(event)
