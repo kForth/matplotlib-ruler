@@ -1,0 +1,13 @@
+[tool.black]
+line-length = 90
+include = '''
+
+(
+    (
+        matplotlib_tools
+      | .github
+    ).*\.pyi?$
+)|(
+    setup\.py
+)
+'''
