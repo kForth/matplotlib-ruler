@@ -358,18 +358,42 @@ class Ruler(AxesWidget):
                 self._ruler_moving = True
 
         if self._end_a_lock is True:
-            # If marker a is locked only move end a.
-            pos_a = event.xdata, self._x1
-            pos_b = event.ydata, self._y1
-            self._marker_a.set_data(event.xdata, event.ydata)
+            # If marker c is locked only move end a.
+
+            # If shift is pressed ruler is constrained to horizontal axis
+            if self._shift_pressed is True:
+                pos_a = event.xdata, self._x1
+                pos_b = self._y0, self._y1
+            # If control is pressed ruler is constrained to vertical axis
+            elif self._control_pressed is True:
+                pos_a = self._x0, self._x1
+                pos_b = event.ydata, self._y1
+            # Else the ruler follow the mouse cursor
+            else:
+                pos_a = event.xdata, self._x1
+                pos_b = event.ydata, self._y1
+
+            self._marker_a.set_data(pos_a[0], pos_b[0])
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
         if self._end_c_lock is True:
             # If marker a is locked only move end c.
-            pos_a = self._x0, event.xdata
-            pos_b = self._y0, event.ydata
-            self._marker_c.set_data(event.xdata, event.ydata)
+
+            # If shift is pressed ruler is constrained to horizontal axis
+            if self._shift_pressed is True:
+                pos_a = self._x0, event.xdata
+                pos_b = self._y0, self._y1
+            # If control is pressed ruler is constrained to vertical axis
+            elif self._control_pressed is True:
+                pos_a = self._x0, self._x1
+                pos_b = self._y0, event.ydata
+            # Else the ruler follow the mouse cursor
+            else:
+                pos_a = self._x0, event.xdata
+                pos_b = self._y0, event.ydata
+
+            self._marker_c.set_data(pos_a[1], pos_b[1])
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
@@ -377,22 +401,28 @@ class Ruler(AxesWidget):
             # If marker b is locked shift the whole ruler.
             b_dx = event.xdata - self._old_mid_coords[0]
             b_dy = event.ydata - self._old_mid_coords[1]
+
+            # If shift is pressed ruler is constrained to horizontal axis
+            if self._shift_pressed is True:
+                b_dy = 0
+            # If control is pressed ruler is constrained to vertical axis
+            elif self._control_pressed is True:
+                b_dx = 0
+
             pos_a = self._x0 + b_dx, self._x1 + b_dx
             pos_b = self._y0 + b_dy, self._y1 + b_dy
+            pos_c = self._old_mid_coords[0] + b_dx, self._old_mid_coords[1] + b_dy
 
-            marker_a_coords = (
+            self._ruler.set_data(pos_a, pos_b)
+            self._marker_a.set_data(
                 self._old_marker_a_coords[0][0] + b_dx,
                 self._old_marker_a_coords[0][1] + b_dy,
             )
-            marker_c_coords = (
+            self._marker_b.set_data(*pos_c)
+            self._marker_c.set_data(
                 self._old_marker_c_coords[0][0] + b_dx,
                 self._old_marker_c_coords[0][1] + b_dy,
             )
-
-            self._ruler.set_data(pos_a, pos_b)
-            self._marker_a.set_data(marker_a_coords)
-            self._marker_b.set_data(event.xdata, event.ydata)
-            self._marker_c.set_data(marker_c_coords)
 
         self._update_text()
         self._update_artists()
