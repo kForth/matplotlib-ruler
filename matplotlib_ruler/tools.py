@@ -171,7 +171,7 @@ class Ruler(AxesWidget):
         if textprops is not None:
             used_textprops.update(used_textprops)
 
-        self._axes_text = self.ax.annotate(s="", **used_textprops)
+        self._axes_text = self.ax.annotate(text="", **used_textprops)
         self.ax.add_artist(self._axes_text)
 
         (self._marker_a,) = self.ax.plot((x0, y0), **used_markerprops)
