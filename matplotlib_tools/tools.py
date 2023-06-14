@@ -1,7 +1,8 @@
 from __future__ import print_function
+
 import numpy as np
-from matplotlib.widgets import AxesWidget
 from matplotlib.text import Text
+from matplotlib.widgets import AxesWidget
 
 
 class Ruler(AxesWidget):
