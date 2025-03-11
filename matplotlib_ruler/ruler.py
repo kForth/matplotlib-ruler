@@ -12,7 +12,7 @@ class Ruler(AxesWidget):
     ----------
     ax  : the  :class:`matplotlib.axes.Axes` instance
 
-    active : bool, default is True
+    active : bool, default is False
         Whether the ruler is active or not.
 
     length_unit  : string, A length unit identifier to use in displayed text
@@ -80,9 +80,9 @@ class Ruler(AxesWidget):
     def __init__(
         self,
         ax,
-        active=True,
         length_unit=None,
         angle_unit="degree",
+        active=False,
         print_text=False,
         useblit=False,
         lineprops=None,
