@@ -289,11 +289,11 @@ class Ruler(AxesWidget):
         self._mouse1_pressed = True
         self._x0 = event.xdata
         self._y0 = event.ydata
-        self._marker_a.set_data((event.xdata, event.ydata))
+        self._marker_a.set_data([event.xdata], [event.ydata])
         self._marker_a.set_visible(True)
 
         if self.useblit:
-            self._marker_a.set_data(self._x0, self._y0)
+            self._marker_a.set_data([self._x0], [self._y0])
             for artist in self._artists:
                 artist.set_animated(True)
             self.canvas.draw()
@@ -428,13 +428,12 @@ class Ruler(AxesWidget):
 
     def _set_midline_marker(self):
         self._marker_b.set_visible(True)
-        self._marker_b.set_data(self.midline_coords)
+        self._marker_b.set_data(*self.midline_coords)
 
     @property
     def midline_coords(self):
         pos0, pos1 = self._ruler.get_path().vertices
-        mid_line_coords = (pos0[0] + pos1[0]) / 2, (pos0[1] + pos1[1]) / 2
-        return mid_line_coords
+        return [(pos0[0] + pos1[0]) / 2], [(pos0[1] + pos1[1]) / 2]
 
     def _draw_ruler(self, event):
         """
@@ -462,7 +461,7 @@ class Ruler(AxesWidget):
         x1 = self._ruler.get_path().vertices[1][0]
         y1 = self._ruler.get_path().vertices[1][1]
         self._marker_c.set_visible(True)
-        self._marker_c.set_data(x1, y1)
+        self._marker_c.set_data([x1], [y1])
         self._set_midline_marker()
         self._update_text()
         self._update_artists()
