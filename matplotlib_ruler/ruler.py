@@ -203,6 +203,8 @@ class Ruler(AxesWidget):
             return True
         if not self.active:
             return True
+        if not self._visible:
+            return True
 
     def _on_key_press(self, event):
         """
