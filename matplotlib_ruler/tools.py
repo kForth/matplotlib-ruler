@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib.text import Text
 from matplotlib.widgets import AxesWidget
 
 
@@ -538,71 +537,3 @@ class Ruler(AxesWidget):
             return angle * 180 / np.pi
         else:
             return angle
-
-
-class TextMover(object):
-    """
-    A simple little tool to move text annotation in an axes by clicking and dragging them.
-
-    """
-
-    def __init__(self, ax, active=True):
-        self.ax = ax
-        self.active = active
-        self.selectedText = None
-        self.mousePressed = False
-        self.background = None
-        self.connect_events()
-
-    def connect_events(self):
-        self.ax.figure.canvas.mpl_connect("pick_event", self.on_pick_event)
-        self.ax.figure.canvas.mpl_connect("motion_notify_event", self.on_motion)
-        self.ax.figure.canvas.mpl_connect("button_release_event", self.on_release)
-
-    def on_pick_event(self, event):
-        if self.active is False:
-            return
-
-        if event.mouseevent.button != 1:
-            return
-
-        if isinstance(event.artist, Text):
-            self.mousePressed = True
-            self.selectedText = event.artist
-
-            canvas = self.selectedText.figure.canvas
-            axes = self.selectedText.axes
-            self.selectedText.set_animated(True)
-            canvas.draw()
-            self.background = canvas.copy_from_bbox(self.selectedText.axes.bbox)
-
-            axes.draw_artist(self.selectedText)
-            canvas.blit(axes.bbox)
-
-    def on_motion(self, event):
-        if event.inaxes != self.ax.axes:
-            return
-
-        if self.mousePressed is True and self.selectedText:
-            self.x1 = event.xdata
-            self.y1 = event.ydata
-
-            coords = (self.x1, self.y1)
-
-            self.selectedText.set_position(coords)
-            canvas = self.selectedText.figure.canvas
-            axes = self.selectedText.axes
-            canvas.restore_region(self.background)
-            axes.draw_artist(self.selectedText)
-            canvas.blit(axes.bbox)
-
-    def on_release(self, event):
-        if self.selectedText is None:
-            return
-
-        self.mousePressed = False
-        self.selectedText.set_animated(False)
-
-        self.background = None
-        self.selectedText.figure.canvas.draw()
-        self.selectedText = None
