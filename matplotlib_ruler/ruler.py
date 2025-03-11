@@ -228,8 +228,7 @@ class Ruler(AxesWidget):
 
         if event.key == "m":
             self.toggle_ruler()
-
-        if event.key == "ctrl+m":
+        elif event.key == "ctrl+m":
             self.toggle_ruler_visibility()
 
     def _on_key_release(self, event):
