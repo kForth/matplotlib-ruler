@@ -1,13 +1,18 @@
 # matplotlib-ruler
-Ruler tool for matplotlib.
 
-## Ruler
+An interactive ruler tool to measure distances and angles in matplotlib.
 
-An an interactive ruler to measure distances. Heavily inspired by the tool in ImageJ.
+Based on [`terranjp/matplotlib-tools`](https://github.com/terranjp/matplotlib-tools) which was heavily inspired by the tool in ImageJ.
 
+## Installation
 
-Usage:
-----------
+Install using pip: `pip install matplotlib_ruler`
+
+### Requirements
+
+`matplotlib_ruler` has two dependecies: `numpy` and `matplotlib`.
+
+## Usage
 
 1. Hold left click drag and release to draw the ruler in the axes.
   - Hold shift while dragging to lock the ruler to the horizontal axis.
@@ -22,8 +27,7 @@ visibility of the line and text:
 
 'ctl+m' : Toggles the visibility of the ruler and text.
 
-Example
-----------
+## Example
 
     >>> xCoord = np.arange(0, 5, 1)
     >>> yCoord = [0, 1, -3, 5, -3]
@@ -44,8 +48,10 @@ Example
     >>> plt.show()
 
 
-
 ![Ruler Gif](/docs/ruler_example.gif?raw=True)
 
+## License
 
+The original [`terranjp/matplotlib-tools`](https://github.com/terranjp/matplotlib-tools) code was released without a specified license, all rights are reserved by the original author.
 
+Modifications are released under the MIT license, see the [`LICENSE`](/LICENSE) file for details.
