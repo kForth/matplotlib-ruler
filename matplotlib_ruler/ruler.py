@@ -371,7 +371,7 @@ class Ruler(AxesWidget):
                 pos_a = event.xdata, self._x1
                 pos_b = event.ydata, self._y1
 
-            self._marker_a.set_data(pos_a[0], pos_b[0])
+            self._marker_a.set_data(pos_a[:1], pos_b[:1])
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
@@ -391,7 +391,7 @@ class Ruler(AxesWidget):
                 pos_a = self._x0, event.xdata
                 pos_b = self._y0, event.ydata
 
-            self._marker_c.set_data(pos_a[1], pos_b[1])
+            self._marker_c.set_data(pos_a[1:2], pos_b[1:2])
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
@@ -413,13 +413,13 @@ class Ruler(AxesWidget):
 
             self._ruler.set_data(pos_a, pos_b)
             self._marker_a.set_data(
-                self._old_marker_a_coords[0][0] + b_dx,
-                self._old_marker_a_coords[0][1] + b_dy,
+                [self._old_marker_a_coords[0][0] + b_dx],
+                [self._old_marker_a_coords[0][1] + b_dy],
             )
-            self._marker_b.set_data(*pos_c)
+            self._marker_b.set_data(*[[e] for e in pos_c])
             self._marker_c.set_data(
-                self._old_marker_c_coords[0][0] + b_dx,
-                self._old_marker_c_coords[0][1] + b_dy,
+                [self._old_marker_c_coords[0][0] + b_dx],
+                [self._old_marker_c_coords[0][1] + b_dy],
             )
 
         self._update_text()
@@ -427,12 +427,12 @@ class Ruler(AxesWidget):
 
     def _set_midline_marker(self):
         self._marker_b.set_visible(True)
-        self._marker_b.set_data(*self.midline_coords)
+        self._marker_b.set_data(*[[e] for e in self.midline_coords])
 
     @property
     def midline_coords(self):
         pos0, pos1 = self._ruler.get_path().vertices
-        return [(pos0[0] + pos1[0]) / 2], [(pos0[1] + pos1[1]) / 2]
+        return (pos0[0] + pos1[0]) / 2, (pos0[1] + pos1[1]) / 2
 
     def _draw_ruler(self, event):
         """
