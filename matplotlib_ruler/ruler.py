@@ -262,7 +262,8 @@ class Ruler(AxesWidget):
                 artist.set_visible(True)
             self._visible = True
 
-        self.canvas.draw_idle()
+        self._update_text()
+        self._update_artists()
 
     def _on_press(self, event):
         """
