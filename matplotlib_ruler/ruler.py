@@ -15,10 +15,14 @@ class Ruler(AxesWidget):
     active : bool, default is False
         Whether the ruler is active or not.
 
-    length_unit  : string, A length unit identifier to use in displayed text
-        i.e. ('ft', or 'm')
+    length_fmt  : string, A format string used in displayed text for lengths
+        i.e. ('{0}ft', or '{0:0.1f}m')
 
-    angle_unit  : string, The type of angle unit ('degrees' or 'radians')
+    angle_fmt  : string, A format string used in displayed text for angles
+        i.e. ('{0}deg', or '{0:0.2f}rad')
+
+    angle_in_degrees  : bool, default is True
+        Whether to use degrees or radians for the angle measurement
 
     print_text  : bool, default is False
         Whether the length measure string is printed to the console
@@ -80,9 +84,10 @@ class Ruler(AxesWidget):
     def __init__(
         self,
         ax,
-        length_unit=None,
-        angle_unit="degree",
         active=False,
+        length_fmt="{0:0.3f}",
+        angle_fmt="{0:0.2f}deg",
+        angle_in_degrees=True,
         print_text=False,
         useblit=False,
         lineprops=None,
@@ -90,10 +95,8 @@ class Ruler(AxesWidget):
         markerprops=None,
     ):
         """
-        Add a ruler to *ax*. If ``ruler_active=True``, the ruler will be
-        activated when the plot is first created. If ``ruler_unit`` is set the
-        string will be appended to the length text annotations.
-
+        Add a ruler to *ax*. If ``active=True``, the ruler will be
+        activated when the plot is first created.
         """
         AxesWidget.__init__(self, ax)
 
@@ -105,8 +108,9 @@ class Ruler(AxesWidget):
         self._print_text = print_text
         self._visible = True
         self.active = active
-        self.length_unit = length_unit
-        self.angle_unit = angle_unit
+        self.length_fmt = length_fmt
+        self.angle_fmt = angle_fmt
+        self.angle_in_degrees = angle_in_degrees
         self.useblit = useblit and self.canvas.supports_blit
 
         self._mouse1_pressed = False
@@ -477,24 +481,14 @@ class Ruler(AxesWidget):
             self.canvas.draw_idle()
 
     def _update_text(self):
-        if self.length_unit is not None:
-            detail_string = "; ".join(
-                (
-                    f"L: {self.ruler_length:0.3f} {self.length_unit}",
-                    f"dx: {self.ruler_dx:0.3f} {self.ruler_dx}",
-                    f"dy: {self.ruler_dy:0.3f} {self.ruler_dy}",
-                    f"ang: {self.ruler_angle:0.3f} deg",
-                )
+        detail_string = "; ".join(
+            (
+                f"L: {self.length_fmt.format(self.ruler_length)}",
+                f"dx: {self.length_fmt.format(self.ruler_dx)}",
+                f"dy: {self.length_fmt.format(self.ruler_dy)}",
+                f"ang: {self.angle_fmt.format(self.ruler_angle)}",
             )
-        else:
-            detail_string = "; ".join(
-                (
-                    f"L: {self.ruler_length:0.3f}",
-                    f"dx: {self.ruler_dx:0.3f}",
-                    f"dy: {self.ruler_dy:0.3f}",
-                    f"ang: {self.ruler_angle:0.3f} deg",
-                )
-            )
+        )
 
         self._axes_text.set_text(detail_string)
         if self._print_text is True:
@@ -528,7 +522,7 @@ class Ruler(AxesWidget):
         pos0, pos1 = self._ruler.get_path().vertices
         angle = np.arctan2(pos1[0] - pos0[0], pos1[1] - pos0[1])
 
-        if self.angle_unit == "degree":
+        if self.angle_in_degrees:
             return angle * 180 / np.pi
         else:
             return angle
