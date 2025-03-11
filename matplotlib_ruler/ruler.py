@@ -254,7 +254,7 @@ class Ruler(AxesWidget):
         Called when the 'ctl+m' key is pressed. If ruler is visible turn it off
         , and vise versa
         """
-        if self._visible is True:
+        if self._visible:
             for artist in self._artists:
                 artist.set_visible(False)
             self.active = False
@@ -336,7 +336,7 @@ class Ruler(AxesWidget):
         if self._end_a_lock or self._end_b_lock or self._end_c_lock is True:
             self._move_ruler(event)
 
-        if self._mouse1_pressed is True:
+        elif self._mouse1_pressed:
             self._draw_ruler(event)
 
     def _move_ruler(self, event):
@@ -355,15 +355,15 @@ class Ruler(AxesWidget):
                 self._background = self.canvas.copy_from_bbox(self.fig.bbox)
                 self._ruler_moving = True
 
-        if self._end_a_lock is True:
+        if self._end_a_lock:
             # If marker c is locked only move end a.
 
             # If shift is pressed ruler is constrained to horizontal axis
-            if self._shift_pressed is True:
+            if self._shift_pressed:
                 pos_a = event.xdata, self._x1
                 pos_b = self._y0, self._y1
             # If control is pressed ruler is constrained to vertical axis
-            elif self._control_pressed is True:
+            elif self._control_pressed:
                 pos_a = self._x0, self._x1
                 pos_b = event.ydata, self._y1
             # Else the ruler follow the mouse cursor
@@ -375,15 +375,15 @@ class Ruler(AxesWidget):
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
-        if self._end_c_lock is True:
+        if self._end_c_lock:
             # If marker a is locked only move end c.
 
             # If shift is pressed ruler is constrained to horizontal axis
-            if self._shift_pressed is True:
+            if self._shift_pressed:
                 pos_a = self._x0, event.xdata
                 pos_b = self._y0, self._y1
             # If control is pressed ruler is constrained to vertical axis
-            elif self._control_pressed is True:
+            elif self._control_pressed:
                 pos_a = self._x0, self._x1
                 pos_b = self._y0, event.ydata
             # Else the ruler follow the mouse cursor
@@ -395,16 +395,16 @@ class Ruler(AxesWidget):
             self._ruler.set_data(pos_a, pos_b)
             self._set_midline_marker()
 
-        if self._end_b_lock is True:
+        if self._end_b_lock:
             # If marker b is locked shift the whole ruler.
             b_dx = event.xdata - self._old_mid_coords[0]
             b_dy = event.ydata - self._old_mid_coords[1]
 
             # If shift is pressed ruler is constrained to horizontal axis
-            if self._shift_pressed is True:
+            if self._shift_pressed:
                 b_dy = 0
             # If control is pressed ruler is constrained to vertical axis
-            elif self._control_pressed is True:
+            elif self._control_pressed:
                 b_dx = 0
 
             pos_a = self._x0 + b_dx, self._x1 + b_dx
@@ -444,11 +444,11 @@ class Ruler(AxesWidget):
         self._y1 = event.ydata
 
         # If shift is pressed ruler is constrained to horizontal axis
-        if self._shift_pressed is True:
+        if self._shift_pressed:
             pos_a = self._x0, self._x1
             pos_b = self._y0, self._y0
         # If control is pressed ruler is constrained to vertical axis
-        elif self._control_pressed is True:
+        elif self._control_pressed:
             pos_a = self._x0, self._x0
             pos_b = self._y0, self._y1
         # Else the ruler follow the mouse cursor
@@ -490,7 +490,7 @@ class Ruler(AxesWidget):
         )
 
         self._axes_text.set_text(detail_string)
-        if self._print_text is True:
+        if self._print_text:
             print(detail_string)
 
     def _on_release(self, event):
