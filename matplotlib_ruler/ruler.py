@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib.backend_tools import Cursors
 from matplotlib.widgets import AxesWidget
 
 
@@ -114,9 +115,8 @@ class Ruler(AxesWidget):
         self.useblit = useblit and self.canvas.supports_blit
 
         self._mouse1_pressed = False
-        self._mouse3_pressed = False
-        self._shift_pressed = False
-        self._control_pressed = False
+        self._pressed_keys = []
+        self._x0 = None
         self._y0 = None
         self._x1 = None
         self._y1 = None
@@ -187,6 +187,14 @@ class Ruler(AxesWidget):
             self._marker_c,
         ]
 
+    @property
+    def _control_pressed(self):
+        return any(e in self._pressed_keys for e in ("ctrl", "control"))
+
+    @property
+    def _shift_pressed(self):
+        return "shift" in self._pressed_keys
+
     def connect_events(self):
         """
         Connect all events to the various callbacks
@@ -201,6 +209,8 @@ class Ruler(AxesWidget):
         """
         Ignore events if the cursor is out of the axes or the widget is locked
         """
+        if self.ax.figure.canvas.toolbar.mode:
+            return True
         if not self.canvas.widgetlock.available(self):
             return True
         if event.inaxes != self.ax.axes:
@@ -209,6 +219,7 @@ class Ruler(AxesWidget):
             return True
         if not self._visible:
             return True
+        return False
 
     def _on_key_press(self, event):
         """
@@ -220,11 +231,8 @@ class Ruler(AxesWidget):
         If ctrl+m is pressed the visibility of the ruler will be toggled
         """
 
-        if event.key == "shift":
-            self._shift_pressed = True
-
-        if event.key == "control":
-            self._control_pressed = True
+        self._pressed_keys = event.key.split("+") if event.key else []
+        self._update_cursor(event)
 
         if event.key == "m":
             self.toggle_ruler()
@@ -235,11 +243,11 @@ class Ruler(AxesWidget):
         """
         Handle key release event, flip the flags to false.
         """
-        if event.key == "shift":
-            self._shift_pressed = False
 
-        if event.key == "control":
-            self._control_pressed = False
+        for key in event.key.split("+"):
+            if key in self._pressed_keys:
+                self._pressed_keys.remove(key)
+        self._update_cursor(event)
 
     def toggle_ruler(self):
         """
@@ -272,40 +280,30 @@ class Ruler(AxesWidget):
         """
         On mouse button press check which button has been pressed and handle
         """
+        self._pressed_keys = event.key.split("+") if event.key else []
+
         if self.ignore(event):
             return
-        if event.button == 1 and self._mouse3_pressed is False:
-            self._handle_button1_press(event)
-        elif event.button == 3:
-            self._handle_button3_press(event)
 
-    def _handle_button1_press(self, event):
-        """
-        On button 1 press start drawing the ruler line from the initial
-        press position
-        """
+        if event.button == 1:
+            if any(self._over_marker(event)):
+                self._handle_ruler_move(event)
+            else:
+                self._handle_ruler_draw(event)
 
-        self._mouse1_pressed = True
-        self._x0 = event.xdata
-        self._y0 = event.ydata
-        self._marker_a.set_data([event.xdata], [event.ydata])
-        self._marker_a.set_visible(True)
+    def _over_marker(self, event):
+        contains_a, _ = self._marker_a.contains(event)
+        contains_b, _ = self._marker_b.contains(event)
+        contains_c, _ = self._marker_c.contains(event)
 
-        if self.useblit:
-            self._marker_a.set_data([self._x0], [self._y0])
-            for artist in self._artists:
-                artist.set_animated(True)
-            self.canvas.draw()
-            self._background = self.canvas.copy_from_bbox(self.fig.bbox)
+        return contains_a, contains_b, contains_c
 
-    def _handle_button3_press(self, event):
+    def _handle_ruler_move(self, event):
         """
         If button 3 is pressed (right click) check if cursor is at one of the
         ruler markers and the move the ruler accordingly.
         """
-        contains_a, _ = self._marker_a.contains(event)
-        contains_b, _ = self._marker_b.contains(event)
-        contains_c, _ = self._marker_c.contains(event)
+        contains_a, contains_b, contains_c = self._over_marker(event)
 
         if not (contains_a or contains_b or contains_c):
             return
@@ -324,11 +322,32 @@ class Ruler(AxesWidget):
         self._old_marker_c_coords = self._marker_c.get_path().vertices
         self._old_mid_coords = self.midline_coords
 
+    def _handle_ruler_draw(self, event):
+        """
+        On button 1 press start drawing the ruler line from the initial
+        press position
+        """
+        self._mouse1_pressed = True
+        self._x0 = event.xdata
+        self._y0 = event.ydata
+        self._marker_a.set_data([event.xdata], [event.ydata])
+        self._marker_a.set_visible(True)
+
+        if self.useblit:
+            self._marker_a.set_data([self._x0], [self._y0])
+            for artist in self._artists:
+                artist.set_animated(True)
+            self.canvas.draw()
+            self._background = self.canvas.copy_from_bbox(self.fig.bbox)
+
     def _on_move(self, event):
         """
         On motion draw the ruler if button 1 is pressed. If one of the markers
         is locked indicating move the ruler according to the locked marker
         """
+
+        self._pressed_keys = event.key.split("+") if event.key else []
+        self._update_cursor(event)
 
         if event.inaxes != self.ax.axes:
             return
@@ -359,7 +378,7 @@ class Ruler(AxesWidget):
             # If marker c is locked only move end a.
 
             # If shift is pressed ruler is constrained to horizontal axis
-            if self._shift_pressed:
+            if "shift" in self._pressed_keys:
                 pos_a = event.xdata, self._x1
                 pos_b = self._y0, self._y1
             # If control is pressed ruler is constrained to vertical axis
@@ -493,9 +512,22 @@ class Ruler(AxesWidget):
         if self._print_text:
             print(detail_string)
 
+    def _get_cursor(self, event):
+        if not self.active:
+            return Cursors.POINTER
+        if not any(self._over_marker(event)):
+            return Cursors.SELECT_REGION
+        if self._shift_pressed:
+            return Cursors.RESIZE_HORIZONTAL
+        if self._control_pressed:
+            return Cursors.RESIZE_VERTICAL
+        return Cursors.HAND
+
+    def _update_cursor(self, event):
+        self.ax.figure.canvas.set_cursor(self._get_cursor(event))
+
     def _on_release(self, event):
         self._mouse1_pressed = False
-        self._mouse3_pressed = False
         self._ruler_moving = False
         self._end_a_lock = False
         self._end_b_lock = False
