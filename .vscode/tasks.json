@@ -1,11 +1,11 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build docs",
-            "type": "shell",
-            "command": "${config:python.defaultInterpreterPath} -m pdoc --html --output-dir docs matplotlib_ruler --force",
-            "problemMatcher": []
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build docs",
+      "type": "shell",
+      "command": "${config:python.defaultInterpreterPath} -m pdoc --html --output-dir docs matplotlib_ruler --force",
+      "problemMatcher": []
+    }
+  ]
 }
