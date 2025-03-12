@@ -22,7 +22,10 @@ def main():
 
     ax.grid(True)
     ax.plot(xCoord, yCoord)
-    ruler = Ruler(ax=ax, active=True, useblit=True, markerprops=markerprops, lineprops=lineprops)
+    ruler = Ruler(
+        ax=ax, active=True, useblit=True, markerprops=markerprops, lineprops=lineprops
+    )
+    ruler.add_toolbar_button()
 
     plt.show()
 

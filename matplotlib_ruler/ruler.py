@@ -1,6 +1,22 @@
+import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.backend_tools import Cursors
+from matplotlib.backend_tools import Cursors, ToolToggleBase
 from matplotlib.widgets import AxesWidget
+
+plt.rcParams["toolbar"] = "toolmanager"
+
+
+class ToolRuler(ToolToggleBase):
+
+    def __init__(self, *args, **kwargs):
+        self.ruler = kwargs.pop("ruler")
+        super().__init__(*args, **kwargs)
+
+    def enable(self, *args):
+        self.ruler.active = True
+
+    def disable(self, *args):
+        self.ruler.active = False
 
 
 class Ruler(AxesWidget):
@@ -209,6 +225,14 @@ class Ruler(AxesWidget):
         self.connect_event("motion_notify_event", self._on_move)
         self.connect_event("key_press_event", self._on_key_press)
         self.connect_event("key_release_event", self._on_key_release)
+
+    def add_toolbar_button(self):
+        """
+        Add a toolbar button for the ruler tool to the matplotlib window.
+        """
+
+        self.fig.canvas.manager.toolmanager.add_tool("Ruler", ToolRuler, ruler=self)
+        self.fig.canvas.manager.toolbar.add_tool("Ruler", "toolgroup")
 
     def ignore(self, event):
         """
