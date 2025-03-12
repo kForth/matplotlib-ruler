@@ -209,7 +209,7 @@ class Ruler(AxesWidget):
         """
         Ignore events if the cursor is out of the axes or the widget is locked
         """
-        if self.ax.figure.canvas.toolbar.mode:
+        if self.fig.canvas.toolbar.mode:
             return True
         if not self.canvas.widgetlock.available(self):
             return True
@@ -524,7 +524,7 @@ class Ruler(AxesWidget):
         return Cursors.HAND
 
     def _update_cursor(self, event):
-        self.ax.figure.canvas.set_cursor(self._get_cursor(event))
+        self.fig.canvas.set_cursor(self._get_cursor(event))
 
     def _on_release(self, event):
         self._mouse1_pressed = False
