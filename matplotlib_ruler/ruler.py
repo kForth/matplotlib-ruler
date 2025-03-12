@@ -114,8 +114,9 @@ class Ruler(AxesWidget):
         self.angle_in_degrees = angle_in_degrees
         self.useblit = useblit and self.canvas.supports_blit
 
-        self._mouse1_pressed = False
+        self._ruler_drawing = False
         self._pressed_keys = []
+        self._mouse_buttons = set()
         self._x0 = None
         self._y0 = None
         self._x1 = None
@@ -186,6 +187,10 @@ class Ruler(AxesWidget):
             self._marker_b,
             self._marker_c,
         ]
+
+    @property
+    def _mouse1_pressed(self):
+        return 1 in self._mouse_buttons
 
     @property
     def _control_pressed(self):
@@ -281,6 +286,7 @@ class Ruler(AxesWidget):
         On mouse button press check which button has been pressed and handle
         """
         self._pressed_keys = event.key.split("+") if event.key else []
+        self._mouse_buttons.add(event.button)
 
         if self.ignore(event):
             return
@@ -327,7 +333,7 @@ class Ruler(AxesWidget):
         On button 1 press start drawing the ruler line from the initial
         press position
         """
-        self._mouse1_pressed = True
+        self._ruler_drawing = True
         self._x0 = event.xdata
         self._y0 = event.ydata
         self._marker_a.set_data([event.xdata], [event.ydata])
@@ -352,10 +358,9 @@ class Ruler(AxesWidget):
         if event.inaxes != self.ax.axes:
             return
 
-        if self._end_a_lock or self._end_b_lock or self._end_c_lock is True:
+        if self._end_a_lock or self._end_b_lock or self._end_c_lock:
             self._move_ruler(event)
-
-        elif self._mouse1_pressed:
+        elif self._ruler_drawing:
             self._draw_ruler(event)
 
     def _move_ruler(self, event):
@@ -515,19 +520,20 @@ class Ruler(AxesWidget):
     def _get_cursor(self, event):
         if not self.active:
             return Cursors.POINTER
-        if not any(self._over_marker(event)):
-            return Cursors.SELECT_REGION
-        if self._shift_pressed:
-            return Cursors.RESIZE_HORIZONTAL
-        if self._control_pressed:
-            return Cursors.RESIZE_VERTICAL
-        return Cursors.HAND
+        if any(self._over_marker(event)) or self._mouse1_pressed and self._ruler_moving:
+            if self._shift_pressed:
+                return Cursors.RESIZE_HORIZONTAL
+            if self._control_pressed:
+                return Cursors.RESIZE_VERTICAL
+            return Cursors.MOVE
+        return Cursors.SELECT_REGION
 
     def _update_cursor(self, event):
         self.fig.canvas.set_cursor(self._get_cursor(event))
 
     def _on_release(self, event):
-        self._mouse1_pressed = False
+        self._mouse_buttons.add(event.button)
+        self._ruler_drawing = False
         self._ruler_moving = False
         self._end_a_lock = False
         self._end_b_lock = False
